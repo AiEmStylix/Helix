@@ -1,40 +1,41 @@
 <script setup lang="ts">
-import {
-    EditableArea,
-    EditableCancelTrigger,
-    EditableEditTrigger,
-    EditableInput,
-    EditablePreview,
-    EditableRoot,
-    EditableSubmitTrigger,
-} from "reka-ui";
+import { invoke } from "@tauri-apps/api/core";
+import { open } from "@tauri-apps/plugin-dialog";
+import { ref } from "vue";
+import { Plug } from "lucide-vue-next";
+
+const fileUrl = ref<string | null>(null);
+const sqlCommand = ref<string | null>(null);
+
+async function testQuery() {
+    try {
+        const result = await invoke<number>("query", {
+            path: fileUrl.value,
+            sql: sqlCommand.value,
+        });
+
+        console.log("Result:", result);
+        alert("Query OK, rows affected = " + result);
+    } catch (err) {
+        console.error("Error:", err);
+        alert("Error: " + err);
+    }
+}
+
+const openDialog = async () => {
+    const file = await open({
+        multiple: false,
+        directory: false,
+    });
+    fileUrl.value = file;
+};
 </script>
 
 <template>
-    <div class="w-[250px]">
-        <EditableRoot
-            v-slot="{ isEditing }"
-            default-value="Click to edit 'Reka UI'"
-            placeholder="Enter text..."
-            class="flex flex-col gap-4"
-            auto-resize
-        >
-            <EditableArea class="text-stone-700 dark:text-white w-[250px]">
-                <EditablePreview />
-                <EditableInput class="w-full placeholder:text-stone-700 dark:placeholder:text-white" />
-            </EditableArea>
-            <EditableEditTrigger
-                v-if="!isEditing"
-                class="w-max inline-flex items-center justify-center rounded-lg font-medium text-sm px-[15px] leading-[35px] h-[35px] bg-white text-green11 shadow-sm border outline-none hover:bg-stone-50 focus:shadow-[0_0_0_2px] focus:shadow-black"
-            />
-            <div v-else class="flex gap-2">
-                <EditableSubmitTrigger
-                    class="inline-flex items-center justify-center rounded-lg font-medium text-sm px-[15px] leading-[35px] h-[35px] bg-white text-green11 shadow-sm border outline-none hover:bg-stone-50 focus:shadow-[0_0_0_2px] focus:shadow-black"
-                />
-                <EditableCancelTrigger
-                    class="inline-flex items-center justify-center rounded-lg font-medium text-sm px-[15px] leading-[35px] h-[35px] bg-red-400 text-white shadow-sm border dark:border-red10 outline-none hover:bg-red10 focus:shadow-[0_0_0_2px] focus:shadow-black"
-                />
-            </div>
-        </EditableRoot>
+    <div class="flex min-w-screen min-h-screen "">
+        <div class="bg-red-400">
+            <button class="bg-blue-400 px-8 py-2 flex mx-8 my-4"><Plug />New connection</button>
+        </div>
+
     </div>
 </template>

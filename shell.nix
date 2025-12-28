@@ -15,9 +15,10 @@ pkgs.mkShell {
   nativeBuildInputs = with pkgs; [
     pkg-config
     gobject-introspection
-
+    wrapGAppsHook3
     # Rust toolchain từ overlay
     rust
+    sqlx-cli
     cargo-tauri
 
     nodejs
@@ -37,5 +38,8 @@ pkgs.mkShell {
     webkitgtk_4_1
     openssl
   ];
-}
 
+  shellHook = ''
+      export XDG_DATA_DIRS="$XDG_DATA_DIRS:${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}"
+  '';
+}
