@@ -2,8 +2,8 @@
 A lightweight, cross-platform **Database Management GUI** built with **Tauri** and **Vue**.  
 Designed for performance, low memory usage, and developer-friendly workflows.
 
-> Work in progress
-> Currently aims to support **SQLite** and **PostgreSQL**  
+> [!WARNING]
+> This project is heavily working in progress.
 
 ---
 
