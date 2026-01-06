@@ -1,14 +1,5 @@
 <script setup lang="ts">
-import {
-    Field,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-    FieldLegend,
-    FieldSeparator,
-    FieldSet,
-} from "@/components/ui/field";
-import type { DatabaseType } from "@/types/DatabaseType";
+import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,6 +7,7 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import { Folders } from "lucide-vue-next";
 
 import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
 import { ref } from "vue";
 
@@ -41,7 +33,9 @@ const browseFile = async () => {
 
 const handleSubmit = async () => {
     try {
+        const window = getCurrentWindow();
         await invoke("save_connection", { dbName: databaseName.value, path: databasePath.value });
+        window.close();
     } catch (error) {
         console.error("Error: " + error);
     }

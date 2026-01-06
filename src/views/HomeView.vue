@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { SplitterGroup, SplitterPanel } from "reka-ui";
 import { Search } from "lucide-vue-next";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import Button from "@/components/ui/button/Button.vue";

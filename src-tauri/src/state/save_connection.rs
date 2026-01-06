@@ -1,5 +1,5 @@
 use serde_json::json;
-use tauri::{App, AppHandle, Manager};
+use tauri::AppHandle;
 use tauri_plugin_store::StoreExt;
 
 pub fn save_connection(app: AppHandle, path: &str) -> tauri_plugin_store::Result<()> {
