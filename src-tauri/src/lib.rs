@@ -1,20 +1,15 @@
 use std::env;
 
-use crate::sqlite::{create_connection, execute::execute_sql};
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Manager};
-use tauri_plugin_store::StoreExt;
+use crate::{
+    commands::sqlite::{save_sqlite_connection, sqlite_list_connections},
+    sqlite::{create_connection, execute::execute_sql},
+};
 
+use tauri::Manager;
+
+mod commands;
 mod sqlite;
-mod state;
-
-#[derive(Serialize, Deserialize, Debug)]
-struct DbConnection {
-    name: String,
-    path: String,
-    created_at: DateTime<Utc>,
-}
+mod storage;
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -55,40 +50,6 @@ async fn new_connection(
     Ok(())
 }
 
-#[tauri::command]
-async fn save_connection(
-    app: AppHandle,
-    db_name: &str,
-    path: &str,
-) -> tauri_plugin_store::Result<()> {
-    let store = app.store("connections.json")?;
-
-    let mut connections: Vec<DbConnection> = store
-        .get("connections")
-        .and_then(|v| serde_json::from_value(v).ok())
-        .unwrap_or_default();
-
-    connections.push(DbConnection {
-        name: db_name.to_string(),
-        path: path.to_string(),
-        created_at: Utc::now(),
-    });
-
-    store.set("connections", serde_json::to_value(connections)?);
-
-    Ok(())
-}
-
-#[tauri::command]
-async fn get_connection(app: AppHandle) -> tauri_plugin_store::Result<Vec<DbConnection>> {
-    let store = app.store("connections.json")?;
-    let connections = store.get("connections");
-    let connections = connections
-        .and_then(|v| serde_json::from_value(v).ok())
-        .unwrap_or_default();
-    Ok(connections)
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -99,13 +60,9 @@ pub fn run() {
             greet,
             query,
             new_connection,
-            save_connection,
-            get_connection
+            sqlite_list_connections,
+            save_sqlite_connection
         ])
-        .setup(|app| {
-            app.store("connections.json")?;
-            Ok(())
-        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

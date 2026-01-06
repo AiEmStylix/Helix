@@ -16,7 +16,7 @@ const newConnection = async () => {
 };
 
 onMounted(async () => {
-    const connections = await invoke<Connection[]>("get_connection");
+    const connections = await invoke<Connection[]>("sqlite_list_connections");
     availableConnections.value = connections;
 });
 </script>

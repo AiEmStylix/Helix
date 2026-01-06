@@ -34,7 +34,7 @@ const browseFile = async () => {
 const handleSubmit = async () => {
     try {
         const window = getCurrentWindow();
-        await invoke("save_connection", { dbName: databaseName.value, path: databasePath.value });
+        await invoke("save_sqlite_connection", { name: databaseName.value, path: databasePath.value });
         window.close();
     } catch (error) {
         console.error("Error: " + error);
