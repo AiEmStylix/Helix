@@ -1,12 +1,20 @@
 use std::env;
 
 use crate::sqlite::{create_connection, execute::execute_sql};
-use serde_json::json;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager};
 use tauri_plugin_store::StoreExt;
 
 mod sqlite;
 mod state;
+
+#[derive(Serialize, Deserialize, Debug)]
+struct DbConnection {
+    name: String,
+    path: String,
+    created_at: DateTime<Utc>,
+}
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -54,8 +62,31 @@ async fn save_connection(
     path: &str,
 ) -> tauri_plugin_store::Result<()> {
     let store = app.store("connections.json")?;
-    store.set("connections", json!({ "name": db_name,"path": path}));
+
+    let mut connections: Vec<DbConnection> = store
+        .get("connections")
+        .and_then(|v| serde_json::from_value(v).ok())
+        .unwrap_or_default();
+
+    connections.push(DbConnection {
+        name: db_name.to_string(),
+        path: path.to_string(),
+        created_at: Utc::now(),
+    });
+
+    store.set("connections", serde_json::to_value(connections)?);
+
     Ok(())
+}
+
+#[tauri::command]
+async fn get_connection(app: AppHandle) -> tauri_plugin_store::Result<Vec<DbConnection>> {
+    let store = app.store("connections.json")?;
+    let connections = store.get("connections");
+    let connections = connections
+        .and_then(|v| serde_json::from_value(v).ok())
+        .unwrap_or_default();
+    Ok(connections)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -68,7 +99,8 @@ pub fn run() {
             greet,
             query,
             new_connection,
-            save_connection
+            save_connection,
+            get_connection
         ])
         .setup(|app| {
             app.store("connections.json")?;
